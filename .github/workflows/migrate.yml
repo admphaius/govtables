@@ -1,0 +1,61 @@
+name: Database Migrations
+
+# Aplica migrations e deploya Edge Functions após merge em main.
+# Roda DEPOIS do CI passar — o Vercel detecta o push automaticamente
+# e faz o deploy em paralelo; as migrations precisam estar aplicadas
+# antes que o tráfego chegue ao novo código.
+#
+# Secrets necessários no repositório GitHub:
+#   SUPABASE_ACCESS_TOKEN  — token pessoal da conta Supabase
+#   SUPABASE_PROJECT_REF   — ref do projeto (ex: abcdefghijklmnop)
+#   SUPABASE_DB_PASSWORD   — senha do banco (em Settings > Database)
+on:
+  push:
+    branches: [main]
+    paths:
+      # Só roda se migrations ou Edge Functions foram modificadas
+      - "supabase/migrations/**"
+      - "supabase/functions/**"
+      - ".github/workflows/migrate.yml"
+
+jobs:
+  migrate:
+    name: Apply Migrations & Deploy Functions
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply database migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase db push \
+            --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" \
+            --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
+
+      - name: Deploy Edge Functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase functions deploy embed-catalog-items \
+            --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: Set Edge Function secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        # Propaga a OPENAI_API_KEY como secret da Edge Function
+        # Só atualiza se o secret OPENAI_API_KEY estiver definido no repo
+        run: |
+          if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
+            echo "${{ secrets.OPENAI_API_KEY }}" | \
+              supabase secrets set OPENAI_API_KEY \
+                --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          fi
