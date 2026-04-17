@@ -3,7 +3,8 @@ import { MapPin } from "lucide-react"
 import { TopBar } from "@/components/govtech/TopBar"
 import { GlassPanel } from "@/components/govtech/GlassPanel"
 import { CatalogTable, TipoBadge, type CatalogColumn } from "@/components/govtech/CatalogTable"
-import { createClient } from "@/lib/supabase/server"
+import { CatalogFiltersForm } from "@/components/govtech/CatalogFiltersForm"
+import { getScoWithFilters, getDistinctValues } from "@/lib/supabase/queries/catalog-filters"
 import { formatBRL, formatMesRef } from "@/lib/utils/format"
 import type { Database } from "@/types/supabase"
 
@@ -67,17 +68,36 @@ const columns: CatalogColumn<ScoRow>[] = [
   },
 ]
 
-export default async function ScoPage() {
-  const client = await createClient()
+interface ScoPageProps {
+  searchParams?: Promise<{
+    q?: string
+    ref?: string
+    tipo?: string
+    grupo?: string
+  }>
+}
 
-  const { data, error } = await client
-    .from("tb_sco")
-    .select("*")
-    .order("mes_referencia", { ascending: false })
-    .order("codigo", { ascending: true })
-    .limit(100)
+export default async function ScoPage({ searchParams }: ScoPageProps) {
+  const params = await searchParams
+  const { data, error } = await getScoWithFilters({
+    q: params?.q,
+    ref: params?.ref,
+    tipo: params?.tipo,
+    grupo: params?.grupo,
+  })
 
   const rows: ScoRow[] = error ? [] : (data ?? [])
+
+  // Obter lista de grupos
+  const grupos = await getDistinctValues("tb_sco", "grupo")
+
+  const additionalFilters = [
+    {
+      name: "grupo",
+      label: "Grupo",
+      options: (grupos as string[]).map((g) => ({ value: g, label: g })),
+    },
+  ]
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -110,15 +130,17 @@ export default async function ScoPage() {
               {rows.length.toLocaleString("pt-BR")}
             </p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              itens carregados
+              itens
             </p>
           </div>
         </GlassPanel>
 
+        <CatalogFiltersForm additionalFilters={additionalFilters} />
+
         <CatalogTable
           data={rows}
           columns={columns}
-          emptyMessage="Nenhum item SCO encontrado. Importe planilha XLS para começar."
+          emptyMessage="Nenhum item SCO encontrado com estes filtros."
         />
       </main>
     </div>

@@ -3,7 +3,8 @@ import { Truck } from "lucide-react"
 import { TopBar } from "@/components/govtech/TopBar"
 import { GlassPanel } from "@/components/govtech/GlassPanel"
 import { CatalogTable, TipoBadge, type CatalogColumn } from "@/components/govtech/CatalogTable"
-import { createClient } from "@/lib/supabase/server"
+import { CatalogFiltersForm } from "@/components/govtech/CatalogFiltersForm"
+import { getSicroWithFilters, getDistinctValues } from "@/lib/supabase/queries/catalog-filters"
 import { formatBRL, formatMesRef } from "@/lib/utils/format"
 import type { Database } from "@/types/supabase"
 import { Badge } from "@/components/ui/badge"
@@ -78,17 +79,60 @@ const columns: CatalogColumn<SicroRow>[] = [
   },
 ]
 
-export default async function SicroPage() {
-  const client = await createClient()
+interface SicroPageProps {
+  searchParams?: Promise<{
+    q?: string
+    ref?: string
+    tipo?: string
+    regiao?: string
+    uf?: string
+    segmento?: string
+  }>
+}
 
-  const { data, error } = await client
-    .from("tb_sicro")
-    .select("*")
-    .order("mes_referencia", { ascending: false })
-    .order("codigo", { ascending: true })
-    .limit(100)
+export default async function SicroPage({ searchParams }: SicroPageProps) {
+  const params = await searchParams
+  const { data, error } = await getSicroWithFilters({
+    q: params?.q,
+    ref: params?.ref,
+    tipo: params?.tipo,
+    regiao: params?.regiao,
+    uf: params?.uf,
+    segmento: params?.segmento,
+  })
 
   const rows: SicroRow[] = error ? [] : (data ?? [])
+
+  // Obter listas para filtros
+  const [regioes, ufs, segmentos] = await Promise.all([
+    getDistinctValues("tb_sicro", "regiao_geografica"),
+    getDistinctValues("tb_sicro", "estado_uf"),
+    getDistinctValues("tb_sicro", "segmento"),
+  ])
+
+  const additionalFilters = [
+    {
+      name: "regiao",
+      label: "Região",
+      options: (regioes as string[]).map((r) => ({
+        value: r,
+        label: r.charAt(0).toUpperCase() + r.slice(1).toLowerCase(),
+      })),
+    },
+    {
+      name: "uf",
+      label: "UF",
+      options: (ufs as string[]).map((u) => ({ value: u, label: u })),
+    },
+    {
+      name: "segmento",
+      label: "Segmento",
+      options: (segmentos as string[]).map((s) => ({
+        value: s,
+        label: s.replace(/_/g, " "),
+      })),
+    },
+  ]
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -122,15 +166,17 @@ export default async function SicroPage() {
               {rows.length.toLocaleString("pt-BR")}
             </p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              itens carregados
+              itens
             </p>
           </div>
         </GlassPanel>
 
+        <CatalogFiltersForm additionalFilters={additionalFilters} />
+
         <CatalogTable
           data={rows}
           columns={columns}
-          emptyMessage="Nenhum item SICRO encontrado. Importe uma planilha para começar."
+          emptyMessage="Nenhum item SICRO encontrado com estes filtros."
         />
       </main>
     </div>

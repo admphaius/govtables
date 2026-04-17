@@ -3,7 +3,8 @@ import { Building2 } from "lucide-react"
 import { TopBar } from "@/components/govtech/TopBar"
 import { GlassPanel } from "@/components/govtech/GlassPanel"
 import { CatalogTable, TipoBadge, type CatalogColumn } from "@/components/govtech/CatalogTable"
-import { createClient } from "@/lib/supabase/server"
+import { CatalogFiltersForm } from "@/components/govtech/CatalogFiltersForm"
+import { getSinapiWithFilters, getDistinctValues } from "@/lib/supabase/queries/catalog-filters"
 import { formatBRL, formatMesRef } from "@/lib/utils/format"
 import type { Database } from "@/types/supabase"
 import { Badge } from "@/components/ui/badge"
@@ -79,17 +80,47 @@ const columns: CatalogColumn<SinapiRow>[] = [
   },
 ]
 
-export default async function SinapiPage() {
-  const client = await createClient()
+interface SinapiPageProps {
+  searchParams?: Promise<{
+    q?: string
+    ref?: string
+    tipo?: string
+    uf?: string
+    onerado?: string
+  }>
+}
 
-  const { data, error } = await client
-    .from("tb_sinapi")
-    .select("*")
-    .order("mes_referencia", { ascending: false })
-    .order("codigo", { ascending: true })
-    .limit(100)
+export default async function SinapiPage({ searchParams }: SinapiPageProps) {
+  const params = await searchParams
+  const { data, error } = await getSinapiWithFilters({
+    q: params?.q,
+    ref: params?.ref,
+    tipo: params?.tipo,
+    uf: params?.uf,
+    onerado: params?.onerado as "true" | "false" | null,
+  })
 
   const rows: SinapiRow[] = error ? [] : (data ?? [])
+
+  // Obter lista de UFs para o filtro
+  const ufs = await getDistinctValues("tb_sinapi", "estado_uf")
+  const ufOptions = (ufs as string[]).map((uf) => ({ value: uf, label: uf }))
+
+  const additionalFilters = [
+    {
+      name: "uf",
+      label: "UF",
+      options: ufOptions,
+    },
+    {
+      name: "onerado",
+      label: "Regime",
+      options: [
+        { value: "true", label: "Onerado" },
+        { value: "false", label: "Desonerado" },
+      ],
+    },
+  ]
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -107,8 +138,7 @@ export default async function SinapiPage() {
       />
 
       <main className="flex-1 overflow-y-auto px-4 py-6 lg:px-6 space-y-4">
-
-        {/* Cabeçalho da seção */}
+        {/* Cabeçalho */}
         <GlassPanel className="flex items-center gap-3 px-4 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/25 text-primary shrink-0">
             <Building2 size={14} />
@@ -124,16 +154,19 @@ export default async function SinapiPage() {
               {rows.length.toLocaleString("pt-BR")}
             </p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              itens carregados
+              itens
             </p>
           </div>
         </GlassPanel>
+
+        {/* Filtros */}
+        <CatalogFiltersForm additionalFilters={additionalFilters} />
 
         {/* Tabela */}
         <CatalogTable
           data={rows}
           columns={columns}
-          emptyMessage="Nenhum item SINAPI encontrado. Importe uma planilha para começar."
+          emptyMessage="Nenhum item SINAPI encontrado com estes filtros."
         />
       </main>
     </div>

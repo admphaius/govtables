@@ -3,7 +3,8 @@ import { Landmark } from "lucide-react"
 import { TopBar } from "@/components/govtech/TopBar"
 import { GlassPanel } from "@/components/govtech/GlassPanel"
 import { CatalogTable, TipoBadge, type CatalogColumn } from "@/components/govtech/CatalogTable"
-import { createClient } from "@/lib/supabase/server"
+import { CatalogFiltersForm } from "@/components/govtech/CatalogFiltersForm"
+import { getEmopWithFilters, getDistinctValues } from "@/lib/supabase/queries/catalog-filters"
 import { formatBRL, formatMesRef } from "@/lib/utils/format"
 import type { Database } from "@/types/supabase"
 import { Badge } from "@/components/ui/badge"
@@ -81,17 +82,36 @@ const columns: CatalogColumn<EmopRow>[] = [
   },
 ]
 
-export default async function EmopPage() {
-  const client = await createClient()
+interface EmopPageProps {
+  searchParams?: Promise<{
+    q?: string
+    ref?: string
+    tipo?: string
+    capitulo?: string
+  }>
+}
 
-  const { data, error } = await client
-    .from("tb_emop")
-    .select("*")
-    .order("mes_referencia", { ascending: false })
-    .order("codigo", { ascending: true })
-    .limit(100)
+export default async function EmopPage({ searchParams }: EmopPageProps) {
+  const params = await searchParams
+  const { data, error } = await getEmopWithFilters({
+    q: params?.q,
+    ref: params?.ref,
+    tipo: params?.tipo,
+    capitulo: params?.capitulo,
+  })
 
   const rows: EmopRow[] = error ? [] : (data ?? [])
+
+  // Obter lista de capítulos
+  const capitulos = await getDistinctValues("tb_emop", "capitulo")
+
+  const additionalFilters = [
+    {
+      name: "capitulo",
+      label: "Capítulo",
+      options: (capitulos as string[]).map((c) => ({ value: c, label: c })),
+    },
+  ]
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -125,15 +145,17 @@ export default async function EmopPage() {
               {rows.length.toLocaleString("pt-BR")}
             </p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              itens carregados
+              itens
             </p>
           </div>
         </GlassPanel>
 
+        <CatalogFiltersForm additionalFilters={additionalFilters} />
+
         <CatalogTable
           data={rows}
           columns={columns}
-          emptyMessage="Nenhum item EMOP encontrado. Importe planilha XLS ou arquivo DBF legado."
+          emptyMessage="Nenhum item EMOP encontrado com estes filtros."
         />
       </main>
     </div>
