@@ -8,7 +8,7 @@ export type TipoItem = Database["public"]["Enums"]["tipo_item"];
 
 /** Resultado de um job de ingestão */
 export interface EtlResult {
-  source: "SINAPI" | "SICRO" | "EMOP" | "SCO";
+  source: "SINAPI" | "SICRO" | "EMOP" | "SCO" | "DCX";
   arquivo: string;
   total_linhas: number;
   inseridos: number;
@@ -80,6 +80,15 @@ export interface ScoRow {
   grupo?: string | null;
   subgrupo?: string | null;
   fonte_arquivo: string;
+}
+
+export interface DcxRow {
+  codigo: string;
+  descricao: string;
+  unidade_medida: string;
+  preco_unitario: string;
+  estado_uf: string;
+  mes_referencia: string;
 }
 
 // ----------------------------------------------------------------
