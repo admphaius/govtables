@@ -50,6 +50,51 @@ export type Database = {
         }
         Relationships: []
       }
+      tb_dcx: {
+        Row: {
+          codigo: string
+          created_at: string | null
+          descricao: string
+          embedding: string | null
+          estado_uf: string
+          fonte_arquivo: string | null
+          id: number
+          is_ativo: boolean | null
+          mes_referencia: string
+          preco_unitario: number
+          unidade_medida: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          embedding?: string | null
+          estado_uf?: string
+          fonte_arquivo?: string | null
+          id?: number
+          is_ativo?: boolean | null
+          mes_referencia: string
+          preco_unitario: number
+          unidade_medida?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          embedding?: string | null
+          estado_uf?: string
+          fonte_arquivo?: string | null
+          id?: number
+          is_ativo?: boolean | null
+          mes_referencia?: string
+          preco_unitario?: number
+          unidade_medida?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tb_emop: {
         Row: {
           capitulo: string | null

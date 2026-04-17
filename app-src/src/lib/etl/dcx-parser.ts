@@ -131,7 +131,7 @@ function parseDcxLine(
   }
 
   // Validar e normalizar preço
-  const precoNormalizado = preco ? parsePreco(preco) : "";
+  const precoNormalizado = preco ? parsePreco(preco) || "" : "";
 
   return {
     codigo,

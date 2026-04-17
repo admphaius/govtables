@@ -2,6 +2,15 @@
 -- Migration 003: Criar tabela tb_dcx (arquivos DCX - EMOP/RJ)
 -- ================================================================
 
+-- Função para atualizar updated_at (se não existir)
+CREATE OR REPLACE FUNCTION update_timestamp_on_row()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE tb_dcx (
   id BIGSERIAL PRIMARY KEY,
 
