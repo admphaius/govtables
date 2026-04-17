@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/etl/sinapi/route.ts": { "maxDuration": 300 },
+    "src/app/api/etl/sicro/route.ts":  { "maxDuration": 300 },
+    "src/app/api/etl/emop/route.ts":   { "maxDuration": 300 },
+    "src/app/api/etl/sco/route.ts":    { "maxDuration": 300 },
+    "src/app/api/etl/embed/route.ts":  { "maxDuration": 120 },
+    "src/app/api/search/route.ts":     { "maxDuration": 30 }
+  }
+}

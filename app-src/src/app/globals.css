@@ -1,0 +1,245 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ============================================================
+   GovTables Design System
+   Fusão: Confiabilidade Governamental + Dashboard SaaS Enterprise
+   Modo primário: Dark
+   Paleta: Baltic Blue + Deep Navy + Cyan-400
+   ============================================================ */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------
+   Mapeamento de tokens Tailwind v4 (CSS-first)
+   ------------------------------------------------------------ */
+@theme inline {
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+  --color-chart-1:              var(--chart-1);
+  --color-chart-2:              var(--chart-2);
+  --color-chart-3:              var(--chart-3);
+  --color-chart-4:              var(--chart-4);
+  --color-chart-5:              var(--chart-5);
+  --color-sidebar:                    var(--sidebar);
+  --color-sidebar-foreground:         var(--sidebar-foreground);
+  --color-sidebar-primary:            var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent:             var(--sidebar-accent);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-border:             var(--sidebar-border);
+  --color-sidebar-ring:               var(--sidebar-ring);
+
+  /* GovTech tokens específicos */
+  --color-govtech-baltic:       var(--govtech-baltic);
+  --color-govtech-accent:       var(--govtech-accent);
+  --color-govtech-glass-bg:     var(--govtech-glass-bg);
+  --color-govtech-glass-border: var(--govtech-glass-border);
+
+  --font-sans:    var(--font-inter);
+  --font-mono:    var(--font-geist-mono);
+  --font-heading: var(--font-inter);
+
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ------------------------------------------------------------
+   Light mode (fallback acessível — sistema primário é dark)
+   ------------------------------------------------------------ */
+:root {
+  --background:           oklch(0.97 0.004 255);
+  --foreground:           oklch(0.15 0.015 255);
+  --card:                 oklch(1 0 0);
+  --card-foreground:      oklch(0.15 0.015 255);
+  --popover:              oklch(1 0 0);
+  --popover-foreground:   oklch(0.15 0.015 255);
+  --primary:              oklch(0.44 0.175 258);
+  --primary-foreground:   oklch(0.98 0 0);
+  --secondary:            oklch(0.94 0.008 255);
+  --secondary-foreground: oklch(0.25 0.02 255);
+  --muted:                oklch(0.94 0.006 255);
+  --muted-foreground:     oklch(0.52 0.015 255);
+  --accent:               oklch(0.78 0.14 210);
+  --accent-foreground:    oklch(0.12 0.03 255);
+  --destructive:          oklch(0.58 0.245 27);
+  --border:               oklch(0.88 0.008 255);
+  --input:                oklch(0.88 0.008 255);
+  --ring:                 oklch(0.44 0.175 258);
+  --chart-1:              oklch(0.44 0.175 258);
+  --chart-2:              oklch(0.78 0.14 210);
+  --chart-3:              oklch(0.60 0.17 145);
+  --chart-4:              oklch(0.70 0.18 55);
+  --chart-5:              oklch(0.58 0.22 330);
+  --radius:               0.5rem;
+  --sidebar:              oklch(0.96 0.005 255);
+  --sidebar-foreground:   oklch(0.15 0.015 255);
+  --sidebar-primary:      oklch(0.44 0.175 258);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent:       oklch(0.90 0.01 255);
+  --sidebar-accent-foreground:  oklch(0.25 0.02 255);
+  --sidebar-border:       oklch(0.88 0.008 255);
+  --sidebar-ring:         oklch(0.44 0.175 258);
+  --govtech-baltic:       oklch(0.44 0.175 258);
+  --govtech-accent:       oklch(0.78 0.14 210);
+  --govtech-glass-bg:     oklch(1 0 0 / 60%);
+  --govtech-glass-border: oklch(0.60 0 0 / 20%);
+}
+
+/* ------------------------------------------------------------
+   Dark mode — paleta principal GovTables
+   #0a0f1e ≈ oklch(0.12 0.025 255)   fundo deep navy
+   #111827 ≈ oklch(0.18 0.018 255)   superfície slate
+   Baltic Blue  → oklch(0.58 0.19 258)
+   Cyan 400     → oklch(0.82 0.13 210)
+   ------------------------------------------------------------ */
+.dark {
+  --background:           oklch(0.12 0.025 255);
+  --foreground:           oklch(0.95 0.005 255);
+  --card:                 oklch(0.18 0.018 255);
+  --card-foreground:      oklch(0.95 0.005 255);
+  --popover:              oklch(0.18 0.018 255);
+  --popover-foreground:   oklch(0.95 0.005 255);
+  --primary:              oklch(0.58 0.19 258);
+  --primary-foreground:   oklch(0.98 0 0);
+  --secondary:            oklch(0.22 0.02 255);
+  --secondary-foreground: oklch(0.92 0.005 255);
+  --muted:                oklch(0.22 0.018 255);
+  --muted-foreground:     oklch(0.60 0.015 255);
+  --accent:               oklch(0.82 0.13 210);
+  --accent-foreground:    oklch(0.10 0.025 255);
+  --destructive:          oklch(0.70 0.20 22);
+  --border:               oklch(1 0 0 / 8%);
+  --input:                oklch(1 0 0 / 12%);
+  --ring:                 oklch(0.58 0.19 258);
+  --chart-1:              oklch(0.58 0.19 258);
+  --chart-2:              oklch(0.82 0.13 210);
+  --chart-3:              oklch(0.72 0.18 145);
+  --chart-4:              oklch(0.78 0.19 55);
+  --chart-5:              oklch(0.68 0.22 330);
+  --sidebar:              oklch(0.15 0.022 255 / 80%);
+  --sidebar-foreground:   oklch(0.90 0.008 255);
+  --sidebar-primary:      oklch(0.58 0.19 258);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent:       oklch(1 0 0 / 6%);
+  --sidebar-accent-foreground:  oklch(0.90 0.008 255);
+  --sidebar-border:       oklch(1 0 0 / 8%);
+  --sidebar-ring:         oklch(0.58 0.19 258);
+  --govtech-baltic:       oklch(0.58 0.19 258);
+  --govtech-accent:       oklch(0.82 0.13 210);
+  --govtech-glass-bg:     oklch(0.18 0.02 255 / 60%);
+  --govtech-glass-border: oklch(1 0 0 / 8%);
+}
+
+/* ------------------------------------------------------------
+   Base layer
+   ------------------------------------------------------------ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  html {
+    @apply font-sans;
+    color-scheme: dark light;
+  }
+
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  {
+    background: oklch(1 0 0 / 15%);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(1 0 0 / 25%);
+  }
+}
+
+/* ------------------------------------------------------------
+   Utilitários GovTech
+   ------------------------------------------------------------ */
+@layer utilities {
+  .glass-panel {
+    background: var(--govtech-glass-bg);
+    border: 1px solid var(--govtech-glass-border);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+
+  .glass-panel-heavy {
+    background: var(--govtech-glass-bg);
+    border: 1px solid var(--govtech-glass-border);
+    backdrop-filter: blur(20px) saturate(200%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .bento-grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+  }
+
+  .bento-col-4  { grid-column: span 4; }
+  .bento-col-6  { grid-column: span 6; }
+  .bento-col-8  { grid-column: span 8; }
+  .bento-col-12 { grid-column: span 12; }
+
+  .glow-baltic {
+    box-shadow: 0 0 20px oklch(0.58 0.19 258 / 30%),
+                0 0 40px oklch(0.58 0.19 258 / 12%);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 16px oklch(0.82 0.13 210 / 35%),
+                0 0 32px oklch(0.82 0.13 210 / 12%);
+  }
+
+  .text-govtech-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.70 0.19 258) 0%,
+      oklch(0.82 0.13 210) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-govtech-pulse {
+    border: 1px solid oklch(0.82 0.13 210 / 50%);
+    box-shadow: inset 0 0 0 1px oklch(0.82 0.13 210 / 10%);
+  }
+}

@@ -1,0 +1,138 @@
+import type { Metadata } from "next"
+import { Truck } from "lucide-react"
+import { TopBar } from "@/components/govtech/TopBar"
+import { GlassPanel } from "@/components/govtech/GlassPanel"
+import { CatalogTable, TipoBadge, type CatalogColumn } from "@/components/govtech/CatalogTable"
+import { createClient } from "@/lib/supabase/server"
+import { formatBRL, formatMesRef } from "@/lib/utils/format"
+import type { Database } from "@/types/supabase"
+import { Badge } from "@/components/ui/badge"
+
+export const metadata: Metadata = { title: "SICRO" }
+
+type SicroRow = Database["public"]["Tables"]["tb_sicro"]["Row"]
+
+const columns: CatalogColumn<SicroRow>[] = [
+  {
+    key: "codigo",
+    header: "Código",
+    className: "w-24 font-mono text-xs text-muted-foreground",
+    render: (row) => row.codigo,
+  },
+  {
+    key: "descricao",
+    header: "Descrição",
+    className: "max-w-[300px]",
+    render: (row) => (
+      <span className="line-clamp-2 text-foreground">{row.descricao}</span>
+    ),
+  },
+  {
+    key: "tipo",
+    header: "Tipo",
+    className: "w-32",
+    render: (row) => <TipoBadge tipo={row.tipo} />,
+  },
+  {
+    key: "segmento",
+    header: "Segmento",
+    className: "w-36 text-xs text-muted-foreground capitalize",
+    render: (row) => row.segmento?.replace(/_/g, " ").toLowerCase() ?? "—",
+  },
+  {
+    key: "unidade_medida",
+    header: "Un.",
+    className: "w-16 text-center text-xs font-mono",
+    render: (row) => row.unidade_medida,
+  },
+  {
+    key: "preco_unitario",
+    header: "Preço Unit.",
+    className: "w-36 text-right tabular-nums font-medium",
+    render: (row) => formatBRL(row.preco_unitario),
+  },
+  {
+    key: "geo",
+    header: "Região / UF",
+    className: "w-28 text-xs text-muted-foreground",
+    render: (row) => (
+      <div className="flex flex-col gap-0.5">
+        {row.estado_uf && (
+          <Badge variant="outline" className="text-[10px] font-mono w-fit">
+            {row.estado_uf}
+          </Badge>
+        )}
+        {row.regiao_geografica && (
+          <span className="text-[10px] capitalize">
+            {row.regiao_geografica.toLowerCase()}
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "mes_referencia",
+    header: "Referência",
+    className: "w-28 text-xs text-muted-foreground",
+    render: (row) => formatMesRef(row.mes_referencia),
+  },
+]
+
+export default async function SicroPage() {
+  const client = await createClient()
+
+  const { data, error } = await client
+    .from("tb_sicro")
+    .select("*")
+    .order("mes_referencia", { ascending: false })
+    .order("codigo", { ascending: true })
+    .limit(100)
+
+  const rows: SicroRow[] = error ? [] : (data ?? [])
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <TopBar
+        title="SICRO"
+        description="Sistema de Custos Referenciais de Obras · DNIT"
+        actions={
+          <div className="flex items-center gap-1.5">
+            <Truck size={14} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              Nacional · Semestral
+            </span>
+          </div>
+        }
+      />
+
+      <main className="flex-1 overflow-y-auto px-4 py-6 lg:px-6 space-y-4">
+        <GlassPanel className="flex items-center gap-3 px-4 py-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/25 text-primary shrink-0">
+            <Truck size={14} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground">
+              Referência para obras de infraestrutura rodoviária, ferroviária e
+              portuária. Organizado por segmento DNIT com granularidade por UF e
+              macrorregião.
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-lg font-semibold tabular-nums text-foreground">
+              {rows.length.toLocaleString("pt-BR")}
+            </p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              itens carregados
+            </p>
+          </div>
+        </GlassPanel>
+
+        <CatalogTable
+          data={rows}
+          columns={columns}
+          emptyMessage="Nenhum item SICRO encontrado. Importe uma planilha para começar."
+        />
+      </main>
+    </div>
+  )
+}
