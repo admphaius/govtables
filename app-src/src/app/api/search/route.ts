@@ -49,8 +49,8 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("search_catalog_semantic", {
-    query_embedding:  JSON.stringify(queryEmbedding) as unknown as string,
-    filter_catalogo:  catalogo,
+    query_embedding:  JSON.stringify(queryEmbedding),
+    filter_catalogo:  catalogo || undefined,
     result_limit:     limit,
     min_similarity:   isNaN(minSimilarity) ? 0.5 : minSimilarity,
   });
